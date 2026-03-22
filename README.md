@@ -1,149 +1,161 @@
-#  AI-Powered Travel Planner  
-A full-stack MERN web application that generates personalized travel itineraries using **AI model (OpenRouter Integration)**.  
-Users can **register, log in, input trip details, and instantly receive an AI-generated travel plan** which is also saved to the database.
+# AI Travel Planner (TripSage)
 
----
+AI Travel Planner is a full-stack MERN application that generates personalized itineraries using OpenRouter, stores trips in MongoDB, and provides extra planning tools like trip history, cost estimation, weather snapshots, hotel and restaurant suggestions, map preview, and PDF export.
 
-##  Features
+## Features
 
-###  Authentication  
-- Register & Login functionality  
-- JWT-based token authentication  
-- Protected backend routes  
+### Authentication and profile
+- Register and login with JWT-based authentication.
+- Gmail-only account validation for signup and login.
+- Protected APIs for planning and trip history.
+- Profile menu with current-user details and profile photo update.
 
-###  AI Travel Plan Generation  
-- Generates a customized itinerary using OpenRouter’s AI models  
-- Takes destination, budget, days, and interests  
-- Returns structured AI-generated text  
+### AI itinerary generation
+- Generate a day-wise itinerary from destination, budget, interests, and trip duration.
+- Prompt includes overview, daily time blocks, food options, logistics, budget breakdown, and packing tips.
+- Duplicate detection via hashed input to reuse an existing plan when the same request is made.
 
-###  Database & User Data  
-- MongoDB stores user accounts and itineraries  
-- Each itinerary is linked to a user via email  
-- Passwords securely hashed  
+### Trip management
+- Save generated itineraries to MongoDB.
+- View trip history for the logged-in user.
+- Deduplicate repeated history entries.
+- Delete plans from history.
+- Edit and regenerate a plan from an existing trip context.
 
-###  Frontend UI  
-- Built with React.js  
-- Clean, responsive interface  
-- Background image support  
-- React Router navigation  
+### Smart planning add-ons
+- Cost Estimator reads itinerary text and estimates expected spend.
+- Travel Insights includes:
+	- Weather snapshot (Open-Meteo)
+	- Restaurant suggestions (OpenStreetMap Nominatim)
+	- Hotel suggestions (OpenStreetMap Nominatim)
+	- Embedded map preview and full-map link
+- Download itinerary as PDF.
 
----
+### UI and navigation
+- React Router based pages for home, login, register, and planner.
+- Planner tabs for Home, New Plan, and My Trips.
+- Responsive custom styling with separate component-level CSS files.
 
-##  Tech Stack
+## Tech stack
 
-**Frontend:**  
-- React.js  
-- Axios  
-- React Router  
-- CSS  
+### Frontend
+- React 19
+- React Router
+- Axios
+- jsPDF
+- CSS
 
-**Backend:**  
-- Node.js  
-- Express.js  
-- MongoDB (Mongoose)  
-- JWT Authentication  
-- Bcrypt  
+### Backend
+- Node.js
+- Express
+- MongoDB with Mongoose
+- JSON Web Token
+- bcryptjs
 
-**AI Integration:**  
-- OpenRouter API  
-- Model used: `mistralai/mistral-7b-instruct`
+### AI and external data APIs
+- OpenRouter Chat Completions API
+	- Current model in code: openai/gpt-3.5-turbo
+- Open-Meteo API
+- OpenStreetMap Nominatim API
 
----
+## Project structure
 
-## Project Structure
-```
+```text
 ai-travel-planner/
-│
 ├── client/
-│ ├── public/
-│ │ └── img/
-│ └── src/
-│ ├── components/
-│ │ ├── LoginForm.js
-│ │ ├── RegisterForm.js
-│ │ ├── TravelForm.js
-│ │ └── Itinerary.js
-│ ├── App.js
-│ ├── App.css
-│ └── index.js
-│
+│   ├── public/
+│   └── src/
+│       ├── components/
+│       │   ├── CostEstimator.js
+│       │   ├── HomePage.js
+│       │   ├── Itinerary.js
+│       │   ├── LoginForm.js
+│       │   ├── RegisterForm.js
+│       │   ├── TravelForm.js
+│       │   ├── TravelInsights.js
+│       │   └── TripHistory.js
+│       ├── img/
+│       ├── styles/
+│       ├── App.js
+│       └── index.js
 ├── server/
-│ ├── controllers/
-│ │ ├── authController.js
-│ │ └── plannerController.js
-│ ├── middleware/
-│ │ └── authMiddleware.js
-│ ├── models/
-│ │ ├── User.js
-│ │ └── Plan.js
-│ ├── routes/
-│ │ ├── auth.js
-│ │ └── planner.js
-│ ├── index.js
-│ ├── package.json
-│ └── .env
+│   ├── controllers/
+│   │   ├── authController.js
+│   │   └── plannerController.js
+│   ├── middleware/
+│   │   └── authMiddleware.js
+│   ├── models/
+│   │   ├── Plan.js
+│   │   └── User.js
+│   ├── routes/
+│   │   ├── authRoutes.js
+│   │   └── planner.js
+│   └── index.js
+└── README.md
 ```
 
+## API overview
 
----
+Base URL: http://localhost:5000
 
-##  How It Works
+### Auth routes
+- POST /api/auth/register
+- POST /api/auth/login
+- GET /api/auth/me (protected)
+- PATCH /api/auth/profile-photo (protected)
 
-### 1️⃣ User Authentication  
-- User registers → credentials stored securely  
-- Passwords hashed with bcrypt  
-- JWT token generated upon login  
-- Token sent with every request to protected routes  
+### Planner routes
+- POST /api/plan (protected)
+- GET /api/plans (protected)
+- DELETE /api/plans/:id (protected)
 
-### 2️⃣ User Inputs Travel Details  
-User enters destination, budget, interests, and days.
+## Environment variables
 
-### 3️⃣ Backend Validates Token  
-`protect` middleware decodes the JWT token and extracts the user's email.
+Create a file at server/.env with:
 
-### 4️⃣ Backend Calls OpenRouter API  
+```env
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret
+OPENROUTER_API_KEY=your_openrouter_api_key
+```
 
-### 5️⃣ AI Generates a Travel Plan
-AI returns a fully structured itinerary
-Itinerary is saved in MongoDB
-Response sent back to frontend
+## Local setup
 
-### 6️⃣ React Displays the Plan
-Displayed beautifully using an Itinerary component.
+### 1. Clone repository
 
----
-## Installation & Setup
-### Clone the repository
-git clone https://github.com/your-username/ai-travel-planner.git
+```bash
+git clone https://github.com/17kdeekshitha/Ai_travel_planner.git
 cd ai-travel-planner
+```
 
-### Backend Setup
+### 2. Install dependencies
+
+```bash
 cd server
 npm install
+cd ../client
+npm install
+```
+
+### 3. Run backend
+
+From server directory:
+
+```bash
+node index.js
+```
+
+### 4. Run frontend
+
+From client directory:
+
+```bash
 npm start
+```
 
-### Create .env file:
-MONGO_URI=your_mongodb_connection_string
-JWT_SECRET=your_secret_key
-OPENROUTER_API_KEY=your_openrouter_key
+Frontend runs on http://localhost:3000 and backend runs on http://localhost:5000.
 
-### Frontend Setup
-cd client  
-npm install  
-npm start
 
----
-## Future Enhancements
 
-- Save & view past itineraries  
-- Add travel cost estimation  
-- Real-time AI chat assistant  
-- Hotel/Flight API integration  
-- Multi-user collaboration on itineraries
----
-## Acknowledgements
 
-- OpenRouter AI
-- MongoDB & Mongoose
-- React & Node.js communities
 
