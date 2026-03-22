@@ -11,6 +11,10 @@ const planSchema = new mongoose.Schema({
   interests: [String],
   days: Number,
   response: String,
+  inputHash: {
+    type: String,
+    index: true
+  },
   createdAt: {
     type: Date,
     default: Date.now
